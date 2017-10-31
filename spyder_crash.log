@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "C:\Python27\lib\site-packages\spyderlib\spyder.py", line 2336, in main
+    mainwindow = run_spyder(app, options, args)
+  File "C:\Python27\lib\site-packages\spyderlib\spyder.py", line 2220, in run_spyder
+    main.setup()
+  File "C:\Python27\lib\site-packages\spyderlib\spyder.py", line 946, in setup
+    from xy.config import DOC_PATH as xy_doc_path
+  File "C:\Python27\lib\site-packages\xy\config.py", line 40, in <module>
+    CONF = UserConfig('xy', defaults=DEFAULTS, version=__version__, subfolder='.xy')
+  File "C:\Python27\lib\site-packages\xy\userconfig.py", line 110, in __init__
+    if version != self.get_version(version):
+  File "C:\Python27\lib\site-packages\xy\userconfig.py", line 130, in get_version
+    return self.get(self.DEFAULT_SECTION_NAME, 'version', version)
+  File "C:\Python27\lib\site-packages\xy\userconfig.py", line 266, in get
+    self.set(section, option, default)
+  File "C:\Python27\lib\site-packages\xy\userconfig.py", line 332, in set
+    self.__save()
+  File "C:\Python27\lib\site-packages\xy\userconfig.py", line 167, in __save
+    self.write(conf_file)
+  File "C:\Python27\lib\ConfigParser.py", line 407, in write
+    fp.write("[%s]\n" % section)
+TypeError: must be unicode, not str

@@ -1,0 +1,6 @@
+23/06/2016 10:10:15 AM - ERROR - Error occured when processing rate_card_prices_20160614.csv
+23/06/2016 10:10:15 AM - ERROR - ('42S02', "[42S02] [Microsoft][SQL Server Native Client 11.0][SQL Server]Invalid object name 'TAS_HydroTasRateCard'. (208) (SQLExecDirectW); [42000] [Microsoft][SQL Server Native Client 11.0][SQL Server]Statement(s) could not be prepared. (8180)")
+23/06/2016 10:11:59 AM - ERROR - Error occured when processing rate_card_prices_20160614.csv
+23/06/2016 10:11:59 AM - ERROR - ('42S02', "[42S02] [Microsoft][SQL Server Native Client 11.0][SQL Server]Invalid object name 'TAS_HydroTasRateCard'. (208) (SQLExecDirectW); [42000] [Microsoft][SQL Server Native Client 11.0][SQL Server]Statement(s) could not be prepared. (8180)")
+23/06/2016 10:12:12 AM - ERROR - Error occured when processing rate_card_prices_20160614.csv
+23/06/2016 10:12:12 AM - ERROR - ('42S02', "[42S02] [Microsoft][SQL Server Native Client 11.0][SQL Server]Invalid object name 'TAS_HydroTasRateCard'. (208) (SQLExecDirectW); [42000] [Microsoft][SQL Server Native Client 11.0][SQL Server]Statement(s) could not be prepared. (8180)")
