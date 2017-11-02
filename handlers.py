@@ -89,6 +89,8 @@ def asx_load(source_file_id,fname,conn,table=None,key_fields=None,output_type='d
         d = ASX_readers.format_ClosingSnapshotFutures(fname)
     elif table == 'ASX_ClosingSnapshot_Options':
         d = ASX_readers.format_ClosingSnapshotOptions(fname)
+    elif table == 'OpenInterestReport':
+        d = ASX_readers.format_OpenInterestReport(fname)     
     else:
         logger.error('Invalid, unspecified or unsupported ASX table specified for loading')
         return (False,0)

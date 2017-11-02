@@ -271,6 +271,27 @@ def format_ClosingSnapshotOptions(filename):
         #print filename + " does not exist"
         pass
 
+def format_OpenInterestReport(filename):
+    """ Function to extract and transform a daily Settlement Futures file from ASX Energy
+        Returns a petl class object if input filename exists
+    """
+    # dateparser to parse from string to datetime
+    i1 = dateparser('%Y/%m/%d',strict=False)
+    i2 = dateparser('%d/%m/%Y',strict=False)
+    t = fromcsv(filename) 
+    print(t)
+
+    try:           
+        filenameOnly = os.path.basename(filename)   
+        t1 = setheader(t, ['Code','Open_Interest','Date_tmp'])      
+        Date = map(i1, map(i2, t1['Date_tmp']))    
+        t1 = cutout(t1, 'Date_tmp')
+        t1 = addcolumn(t1, 'Date', Date)
+        return t1
+        
+    except IOError:
+        #print filename + " does not exist"
+        pass
 
 
 #def processFiles(runDate = date(2002, 9, 3), dir = os.path.normpath("C:/Development/Daily Files/test2/")):
