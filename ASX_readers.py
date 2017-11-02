@@ -294,6 +294,38 @@ def format_OpenInterestReport(filename):
         pass
 
 
+def format_FinalSnapShot(filename):
+
+
+    t = fromcsv(filename)
+    i1 = dateparser('%Y/%m/%d',strict=False)
+    i2 = dateparser('%d/%m/%Y',strict=False)
+
+
+    try:           
+        filenameOnly = os.path.basename(filename)   
+        t1 = setheader(t, ['Code','Last_Trading_Date_tmp','Bid_Price','Bid_Size','Ask_Price','Ask_Size','Last_Price','Traded_Volume','Open_Price','High_Price','Low_Price','Settlement_Price','Settlement_Date_tmp','Implied_Volatility','Last_Trade_Time_tmp'])      
+        t2 = replace(t1, header(t1), '', None)
+
+        Last_Trading_Date = map(i1, map(i2, t2['Last_Trading_Date_tmp']))    
+        Settlement_Date = map(i1, map(i2,t2['Settlement_Date_tmp']))
+
+        # Lambda replace - with : in Last Trade Time
+        Last_Trade_Time= map(lambda x: x if x is None else x.decode('utf-8').replace("-", ":").encode("utf-8"), t2['Last_Trade_Time_tmp'])
+        t2 = cutout(t2, 'Last_Trading_Date_tmp')
+        t2 = addcolumn(t2, 'Last_Trading_Date', Last_Trading_Date)
+        t2 = cutout(t2,'Settlement_Date_tmp')
+        t2 = addcolumn(t2,'Settlement_Date',Settlement_Date)
+        t2 = cutout(t2,'Last_Trade_Time_tmp')
+        t2 = addcolumn(t2,'Last_Trade_Time',Last_Trade_Time)
+        print(t2)
+
+        return t2
+        
+    except IOError:
+        #print filename + " does not exist"
+        pass
+
 #def processFiles(runDate = date(2002, 9, 3), dir = os.path.normpath("C:/Development/Daily Files/test2/")):
 #def processFiles(runDate = date.today(), dir = os.path.normpath("C:/MarketData/ASX Daily Files/")):
 def processFiles(runDate = date.today(), dir = os.path.normpath("C:/Development/Daily Files/")):    
