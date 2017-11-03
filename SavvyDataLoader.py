@@ -170,8 +170,13 @@ def process_file(file_name, folder_tup):
                     
     # write to loader file list in database
     try:
-        with conn.cursor() as curs:            
-            tmp = (job_id, file_name, source_folder, 'STARTED', 0, file_mod_time)
+        with conn.cursor() as curs:
+            # `file_name` field in [MarketData].[dbo].[SavvyLoaderFiles] is limit at 80 characters
+            if len(file_name) > 80:
+                file_name_saved_in_db = file_name[-80:]
+            else:
+                file_name_saved_in_db = file_name
+            tmp = (job_id, file_name_saved_in_db, source_folder, 'STARTED', 0, file_mod_time)
             curs.execute("INSERT INTO MarketData.dbo.SavvyLoaderFiles (job_id,file_name,source_folder,process_status,records_processed,file_modified_dttm) OUTPUT Inserted.ID VALUES (?,?,?,?,?,?)", tmp)
             fileid = curs.fetchone()[0]            
             conn.commit()
