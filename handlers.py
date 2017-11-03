@@ -90,9 +90,11 @@ def asx_load(source_file_id,fname,conn,table=None,key_fields=None,output_type='d
     elif table == 'ASX_ClosingSnapshot_Options':
         d = ASX_readers.format_ClosingSnapshotOptions(fname)
     elif table == 'OpenInterestReport':
-        d = ASX_readers.format_OpenInterestReport(fname) 
+        d = ASX_readers.format_OpenInterestReport(fname)
     elif table == 'FinalSnapShot':
-        d = ASX_readers.format_FinalSnapShot(fname)      
+        d = ASX_readers.format_FinalSnapShot(fname)
+    elif table == 'ASX_TradeLog':
+        d = ASX_readers.format_TradeLog(fname)
     else:
         logger.error('Invalid, unspecified or unsupported ASX table specified for loading')
         return (False,0)

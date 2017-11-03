@@ -321,7 +321,30 @@ def format_FinalSnapShot(filename):
         print(t2)
 
         return t2
-        
+
+    except IOError:
+        #print filename + " does not exist"
+        pass
+
+def format_TradeLog(filename):
+    t = fromcsv(filename)
+    i1 = dateparser('%Y/%m/%d',strict=False)
+    i2 = dateparser('%d/%m/%Y',strict=False)
+    try:
+        filenameOnly = os.path.basename(filename)  
+        t1 = setheader(t, ['Date','Time','trade_type','display_code','volume','_$_mwh']) 
+        t2 = replace(t1, header(t1), '', None)
+        Final_Time= map(lambda x: x if x is None else x.decode('utf-8').replace("-", ":").encode("utf-8"), t2['Time'])
+        t2 = cutout(t2,'Time')
+        t2 = addcolumn(t2,'FinalTime',Final_Time)
+
+        datetime = map(i1, map(i2,t2['Date']))
+        t2 = cutout(t2,'FinalTime')
+        t2 = cutout(t2,'Date')
+        t2 = addcolumn(t2,'date_time',datetime)
+        t2 = addcolumn(t2,'added_dttm',datetime)
+
+        return t2
     except IOError:
         #print filename + " does not exist"
         pass
