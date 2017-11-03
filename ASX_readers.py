@@ -279,9 +279,8 @@ def format_OpenInterestReport(filename):
     i1 = dateparser('%Y/%m/%d',strict=False)
     i2 = dateparser('%d/%m/%Y',strict=False)
     t = fromcsv(filename) 
-    print(t)
 
-    try:           
+    try:
         filenameOnly = os.path.basename(filename)   
         t1 = setheader(t, ['Code','Open_Interest','Date_tmp'])      
         Date = map(i1, map(i2, t1['Date_tmp']))    
@@ -293,16 +292,12 @@ def format_OpenInterestReport(filename):
         #print filename + " does not exist"
         pass
 
-
 def format_FinalSnapShot(filename):
-
-
     t = fromcsv(filename)
     i1 = dateparser('%Y/%m/%d',strict=False)
     i2 = dateparser('%d/%m/%Y',strict=False)
 
-
-    try:           
+    try:
         filenameOnly = os.path.basename(filename)   
         t1 = setheader(t, ['Code','Last_Trading_Date_tmp','Bid_Price','Bid_Size','Ask_Price','Ask_Size','Last_Price','Traded_Volume','Open_Price','High_Price','Low_Price','Settlement_Price','Settlement_Date_tmp','Implied_Volatility','Last_Trade_Time_tmp'])      
         t2 = replace(t1, header(t1), '', None)
@@ -318,10 +313,8 @@ def format_FinalSnapShot(filename):
         t2 = addcolumn(t2,'Settlement_Date',Settlement_Date)
         t2 = cutout(t2,'Last_Trade_Time_tmp')
         t2 = addcolumn(t2,'Last_Trade_Time',Last_Trade_Time)
-        print(t2)
 
         return t2
-
     except IOError:
         #print filename + " does not exist"
         pass

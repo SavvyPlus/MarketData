@@ -16,3 +16,5 @@ pip-selfcheck.json
 
 # PyCharm
 .idea
+
+*.log
