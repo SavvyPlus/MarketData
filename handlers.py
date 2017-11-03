@@ -89,9 +89,9 @@ def asx_load(source_file_id,fname,conn,table=None,key_fields=None,output_type='d
         d = ASX_readers.format_ClosingSnapshotFutures(fname)
     elif table == 'ASX_ClosingSnapshot_Options':
         d = ASX_readers.format_ClosingSnapshotOptions(fname)
-    elif table == 'OpenInterestReport':
+    elif table == 'ASX_OpenInterest_Report':
         d = ASX_readers.format_OpenInterestReport(fname)
-    elif table == 'FinalSnapShot':
+    elif table == 'ASX_FinalSnapShot':
         d = ASX_readers.format_FinalSnapShot(fname)
     elif table == 'ASX_TradeLog':
         d = ASX_readers.format_TradeLog(fname)
