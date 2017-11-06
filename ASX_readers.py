@@ -283,11 +283,15 @@ def format_OpenInterestReport(filename):
     try:
         filenameOnly = os.path.basename(filename)   
         t1 = setheader(t, ['Code','Open_Interest','Date_tmp'])      
+
+        Code= map(lambda x: x if x is None else x.decode('utf-8')[:7].encode("utf-8"), t1['Code'])
         Date = map(i1, map(i2, t1['Date_tmp']))    
         t1 = cutout(t1, 'Date_tmp')
         t1 = addcolumn(t1, 'Date', Date)
+        t1 = cutout(t1, 'Code')
+        t1 = addcolumn(t1,'Code',Code)
+
         return t1
-        
     except IOError:
         #print filename + " does not exist"
         pass
@@ -307,12 +311,16 @@ def format_FinalSnapShot(filename):
 
         # Lambda replace - with : in Last Trade Time
         Last_Trade_Time= map(lambda x: x if x is None else x.decode('utf-8').replace("-", ":").encode("utf-8"), t2['Last_Trade_Time_tmp'])
+        Code= map(lambda x: x if x is None else x.decode('utf-8')[:7].encode("utf-8"), t2['Code'])
+
         t2 = cutout(t2, 'Last_Trading_Date_tmp')
         t2 = addcolumn(t2, 'Last_Trading_Date', Last_Trading_Date)
         t2 = cutout(t2,'Settlement_Date_tmp')
         t2 = addcolumn(t2,'Settlement_Date',Settlement_Date)
         t2 = cutout(t2,'Last_Trade_Time_tmp')
         t2 = addcolumn(t2,'Last_Trade_Time',Last_Trade_Time)
+        t2 = cutout(t2,'Code')
+        t2 = addcolumn(t2,'Code',Code)
 
         return t2
     except IOError:
@@ -327,15 +335,13 @@ def format_TradeLog(filename):
         filenameOnly = os.path.basename(filename)  
         t1 = setheader(t, ['Date','Time','trade_type','display_code','volume','_$_mwh']) 
         t2 = replace(t1, header(t1), '', None)
-        Final_Time= map(lambda x: x if x is None else x.decode('utf-8').replace("-", ":").encode("utf-8"), t2['Time'])
-        t2 = cutout(t2,'Time')
-        t2 = addcolumn(t2,'FinalTime',Final_Time)
+        format_date = map(i1,map(i2,t2['Date']))
+        format_time = map(lambda x: x if x is None else x.decode('utf-8').replace("-", ":").encode("utf-8"), t2['Time'])
+        format_datetime =map(lambda x,y : x if x is None else (str(x).decode('utf-8') +' '+y.decode('utf-8')).encode('utf-8'), format_date ,format_time )
 
-        datetime = map(i1, map(i2,t2['Date']))
-        t2 = cutout(t2,'FinalTime')
+        t2 = cutout(t2,'Time')
         t2 = cutout(t2,'Date')
-        t2 = addcolumn(t2,'date_time',datetime)
-        t2 = addcolumn(t2,'added_dttm',datetime)
+        t2 = addcolumn(t2,'date_time',format_datetime)
 
         return t2
     except IOError:
