@@ -284,7 +284,7 @@ def format_OpenInterestReport(filename):
         filenameOnly = os.path.basename(filename)   
         t1 = setheader(t, ['Code','Open_Interest','Date_tmp'])      
 
-        Code= map(lambda x: x if x is None else x.decode('utf-8')[:7].encode("utf-8"), t1['Code'])
+        Code= map(lambda x: x if x is None or len(x.decode('utf-8')) > 8 else x.decode('utf-8')[:7].encode("utf-8"), t1['Code'])
         Date = map(i1, map(i2, t1['Date_tmp']))    
         t1 = cutout(t1, 'Date_tmp')
         t1 = addcolumn(t1, 'Date', Date)
@@ -311,7 +311,7 @@ def format_FinalSnapShot(filename):
 
         # Lambda replace - with : in Last Trade Time
         Last_Trade_Time= map(lambda x: x if x is None else x.decode('utf-8').replace("-", ":").encode("utf-8"), t2['Last_Trade_Time_tmp'])
-        Code= map(lambda x: x if x is None else x.decode('utf-8')[:7].encode("utf-8"), t2['Code'])
+        Code= map(lambda x: x if x is None or len(x.decode('utf-8')) > 8 else x.decode('utf-8')[:7].encode("utf-8"), t2['Code'])
 
         t2 = cutout(t2, 'Last_Trading_Date_tmp')
         t2 = addcolumn(t2, 'Last_Trading_Date', Last_Trading_Date)
