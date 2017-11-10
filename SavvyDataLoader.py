@@ -23,6 +23,10 @@ import logging.config
 import fnmatch
 import shutil
 import handlers
+0import traceback
+from datadog import initialize
+from datadog import statsd
+from datadog import api as DataDogAPI
 
 
 def setup_logging(
@@ -43,8 +47,17 @@ def setup_logging(
         logging.config.dictConfig(config)
     else:
         logging.basicConfig(level=default_level)
+    config = configparser.ConfigParser()
+    config.read('DataDog.cfg')
+    api_key = str(config.get('Datadog Connection','api_key'))
+    app_key = str(config.get('Datadog Connection','app_key'))
+
+    initialize(api_key=api_key,app_key=app_key)  
+    statsd.increment('page.views')
 
 # Initialise logging
+tags = ['version:1', 'application:loader']
+
 logger = logging.getLogger(__name__)
 setup_logging()
 logger.info("Savvy Data Loader starting...")
@@ -152,7 +165,10 @@ def process_file(file_name, folder_tup):
     try:
         conn = pyodbc.connect(db_connection_string)
     except pyodbc.Error:
-        logger.error("Error processing file: %s. Could not establish database connection using connection string %s", file_name, db_connection_string, exc_info=1)
+        error_text = "Error processing file: %s. Could not establish database connection using connection string %s" % (file_name, db_connection_string)        
+        logger.error(error_text, exc_info=1)
+        DataDogAPI.Event.create(title="Error processing file:", text=error_text, alert_type="error",tags=tags) 
+
         time.sleep(db_connect_retry_seconds)
         return False
         
@@ -164,7 +180,9 @@ def process_file(file_name, folder_tup):
         os.rename(file_fullname+".renamed", file_fullname)
 
     except EnvironmentError:
-        logger.error("File does not exist or is in use by another process: %s", file_fullname, exc_info=1)
+        error_text= "File does not exist or is in use by another process: %s" % (file_fullname)        
+        logger.error(error_text, file_fullname, exc_info=1)
+        DataDogAPI.Event.create(title="EnvironmentError file:", text=error_text, alert_type="error") 
         return False
 
                     
@@ -181,7 +199,10 @@ def process_file(file_name, folder_tup):
             fileid = curs.fetchone()[0]            
             conn.commit()
     except pyodbc.Error:
-        logger.error("Could not log file to database: %s", file_name)
+        error_text = "Could not log file to database: %s" % file_name
+        logger.error(error_text)
+        DataDogAPI.Event.create(title="File Error:", text=error_text, alert_type="error",tags=tags) 
+
         return False
     
     # handler parameters
@@ -215,23 +236,29 @@ def process_file(file_name, folder_tup):
         else:
             (success,recs_loaded) = (False,0)
             logger.error("Invalid or unknown loading handler specified: %s", handler)
-    except Exception:
+    except Exception as ex:
         (success,recs_loaded) = (False,0)
-        logger.error("Unknown error in loading handler while processing file %s", file_name, exc_info=1)
+        error_text= "Unknown error in loading handler while processing file %s" % (file_name)  
+        logger.error(error_text)
+        DataDogAPI.Event.create(title="Unknown error: ", text=error_text+"\n" +str(ex) , alert_type="error",tags=tags,aggregation_key="initialize") 
+
+
         
     
     if success:
         logger.info('File loaded successfully: %s', file_name)
         dest_folder = os.path.join(success_folder,file_name)
     else:        
-        logger.info('File failed to load: %s', file_name)
+        logger.info('File failed to load: %s', file_name) 
         dest_folder = os.path.join(fail_folder,file_name)
     
     try:        
         shutil.move(file_fullname, dest_folder)    
     except EnvironmentError:
-        logger.error("Unable to move file: %s to location %s", file_name, dest_folder, exc_info=1)
-        
+        error_text = "Unable to move file: %s to location %s"% (file_name, dest_folder)        
+        logger.error(error_text, exc_info=1)
+        DataDogAPI.Event.create(title="Move File error: ", text=error_text, alert_type="error",tags=tags) 
+
         
     # write to loader file list in database
     try:
@@ -278,15 +305,12 @@ def main():
     except KeyboardInterrupt:        
         logger.info("Application terminated by user. Exiting")
     except:
-        logger.error("Fatal error encountered. Exiting", exc_info=1)
+        error_text = "Fatal error encountered. Exiting"
+        logger.error(error_text, exc_info=1)
+        DataDogAPI.Event.create(title="Fatal error", text=error_text, alert_type="error",tags=tags) 
         raise
         
-        
-        
     
-
-        
-
 
 if __name__ == "__main__":
     main()
