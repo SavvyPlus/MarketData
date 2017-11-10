@@ -23,7 +23,7 @@ import logging.config
 import fnmatch
 import shutil
 import handlers
-0import traceback
+import traceback
 from datadog import initialize
 from datadog import statsd
 from datadog import api as DataDogAPI
