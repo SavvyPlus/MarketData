@@ -16,6 +16,11 @@
         cd <path to project:i.e C:\MarketData>
         pip install -r requirements.txt
 ```
+  - Instal ceODBC
+```
+        download the ceODBC-2.0.1-cp27-cp27m-win_amd64.whl file from https://www.lfd.uci.edu/~gohlke/pythonlibs/
+        pip install ceODBC-2.0.1-cp27-cp27m-win_amd64.whl
+```
 ## SavvyDataLoader
 
 ### Build
