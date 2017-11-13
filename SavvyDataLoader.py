@@ -24,8 +24,7 @@ import fnmatch
 import shutil
 import handlers
 import traceback
-from datadog import initialize
-from datadog import statsd
+from datadog import initialize as DataDogInitialize
 from datadog import api as DataDogAPI
 
 
@@ -52,11 +51,10 @@ def setup_logging(
     api_key = str(config.get('Datadog Connection','api_key'))
     app_key = str(config.get('Datadog Connection','app_key'))
 
-    initialize(api_key=api_key,app_key=app_key)  
-    statsd.increment('page.views')
+    DataDogInitialize(api_key=api_key,app_key=app_key)  
 
 # Initialise logging
-tags = ['version:1', 'application:loader']
+tags = ['version:1', 'application:savvy data loader']
 
 logger = logging.getLogger(__name__)
 setup_logging()
