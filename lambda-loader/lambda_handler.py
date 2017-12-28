@@ -15,15 +15,20 @@ import shutil
 import handlers
 from boto3 import client
 import re
+import urllib2
 
 
 conn = client('s3')
 
-def list_folder():
-    url = ""
-    for key in conn.list_objects(Bucket="savvyloader",Prefix="savvy-queue/ASX Energy/")['Contents']:
-        url =url + str(key['Key']) +"\n"
-    print(url)
+def move_file(filename):
+    """
+    Moves a file from src to dst
+    """
+    print("moving file")
+    print(filename)
+    conn.copy({'Bucket': "savvyloader", 'Key': 'savvy-process/%s' % filename}, "savvyloader", 'savvy-archine/%s' % filename)
+    conn.delete_object(Bucket="savvyloader", Key='savvy-process/%s' % filename)
+    
 
 def get_source_folder_list():
     try:
@@ -148,9 +153,11 @@ def process_file(file_name, folder_tup):
 
 def lambda_handler(event, context):
     filename = event['Records'][0]['s3']['object']['key'].split('/')[-1]
-    print(filename)
+    filename = urllib2.unquote(filename)
+    filename = filename.replace('+',' ')
     file_folder = get_source_file_list(get_source_folder_list(),filename)
     process_file(filename,file_folder)
+    move_file(filename)
 
 # main method for testing outside of lambda environment
 if __name__ == '__main__':
@@ -160,6 +167,5 @@ if __name__ == '__main__':
     # this_file = files.pop()
     # print(this_file[0])    
     # print(this_file[1])
-    file_folder = get_source_file_list(get_source_folder_list(),filename)
-    process_file(filename,file_folder)
+    move_file(filename)
 

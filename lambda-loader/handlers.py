@@ -62,7 +62,6 @@ def asx_load(source_file_id,fname,conn,table=None,key_fields=None,output_type='d
     elif table == 'ASX_OpenInterest_Report':
         d = ASX_readers.format_OpenInterestReport(fname)
     elif table == 'ASX_FinalSnapShot':
-        print('no error in handler')
         d = ASX_readers.format_FinalSnapShot(fname)
     elif table == 'ASX_TradeLog':
         d = ASX_readers.format_TradeLog(fname)
@@ -95,14 +94,16 @@ def asx_load(source_file_id,fname,conn,table=None,key_fields=None,output_type='d
     if len(d)-1 > 0:
         try:
             index =0 
+            curs = conn.cursor()
             for data in sql_params:
                 index = index + 1
                 if index % 1000 == 0:
                     print(index)
-                curs = conn.cursor()
+                
                 curs.execute(sql, tuple(data))   
-                conn.commit()
-                curs.close()
+            conn.commit()
+            curs.close()
+            print("finish")    
         except Exception as e:
             print(e)
     #except:

@@ -1,6 +1,5 @@
 from petl import *
 from datetime import date
-import urllib2
 import os
 import pymssql
 from numpy import inf
@@ -13,10 +12,7 @@ def format_OpenInterestReport(filename):
     """ Function to extract and transform a daily Settlement Futures file from ASX Energy
         Returns a petl class object if input filename exists
     """
-
-    filename = urllib2.unquote(filename)
-    filename = filename.replace("+"," ")
-    obj = conn.get_object(Bucket="savvyloader", Key="savvy-queue/%s" % (filename))
+    obj = conn.get_object(Bucket="savvyloader", Key="savvy-process/%s" % (filename))
     data = obj['Body'].read().decode('utf-8')
     datasource = MemorySource(data)
 
@@ -45,9 +41,7 @@ def format_OpenInterestReport(filename):
 
 def format_FinalSnapShot(filename):
 
-    filename = urllib2.unquote(filename)
-    filename = filename.replace("+"," ")
-    obj = conn.get_object(Bucket="savvyloader", Key="savvy-queue/%s" % (filename))
+    obj = conn.get_object(Bucket="savvyloader", Key="savvy-process/%s" % (filename))
     data = obj['Body'].read().decode('utf-8')
     datasource = MemorySource(data)
 
@@ -84,9 +78,7 @@ def format_FinalSnapShot(filename):
         pass
 
 def format_TradeLog(filename):
-    filename = urllib2.unquote(filename)
-    filename = filename.replace("+"," ")
-    obj = conn.get_object(Bucket="savvyloader", Key="savvy-queue/%s" % (filename))
+    obj = conn.get_object(Bucket="savvyloader", Key="savvy-process/%s" % (filename))
     data = obj['Body'].read().decode('utf-8')
     datasource = MemorySource(data)
 
