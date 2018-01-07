@@ -18,7 +18,12 @@ import re
 import urllib2
 
 
-conn = client('s3')
+s3_connection = client('s3')
+
+db_server = 'app-2-savvy-work.ciimkozo2x5b.ap-southeast-2.rds.amazonaws.com'
+db_database = 'MarketData'
+db_user = 'djangounchained'
+db_password = 'jLddF5JQ%v!0'
 
 def move_file(filename):
     """
@@ -26,18 +31,18 @@ def move_file(filename):
     """
     print("moving file")
     print(filename)
-    conn.copy({'Bucket': "savvyloader", 'Key': 'savvy-process/%s' % filename}, "savvyloader", 'savvy-archine/%s' % filename)
-    conn.delete_object(Bucket="savvyloader", Key='savvy-process/%s' % filename)
-    
+    s3_connection.copy({'Bucket': "savvyloader", 'Key': 'savvy-process/%s' % filename}, "savvyloader", 'savvy-archine/%s' % filename)
+    s3_connection.delete_object(Bucket="savvyloader", Key='savvy-process/%s' % filename)
+
 
 def get_source_folder_list():
     try:
-        connection = pymssql.connect(server='app-2-savvy-work.ciimkozo2x5b.ap-southeast-2.rds.amazonaws.com', user='djangounchained', password='jLddF5JQ%v!0', database='MarketData')
+        connection = pymssql.connect(server=db_server, user=db_user, password=db_password, database=db_database)
         print("Connected...\n")
 
         cursor = connection.cursor()
         cursor.execute("""
-            SELECT ID,source_folder,success_folder,fail_folder,[priority]      
+            SELECT ID,source_folder,success_folder,fail_folder,[priority]
             ,filename_pattern,handler,handler_params,success_retention_days
             FROM [MarketData].[dbo].[SavvyLoaderJobsLambda]
             where active_flag = 1
@@ -46,14 +51,15 @@ def get_source_folder_list():
         print('query executed...\n')
 
         folder_tup = cursor.fetchall()
-        
+
         print(folder_tup)
-        # Close database connections        
+        # Close database connections
         connection.close()
-    
-        return folder_tup   
+
+        return folder_tup
     except:
         print("Unexpected error: ", sys.exc_info()[0] )
+
 
 def get_source_file_list(folders,filename):
     files = []
@@ -65,37 +71,39 @@ def get_source_file_list(folders,filename):
         filename_pattern = folder[5].strip()
         if fnmatch.fnmatch(filename, filename_pattern):
             return folder
+
+
 def process_file(file_name, folder_tup):
     print(folder_tup)
     # todo: if folder_tup not supplied, search folders for 1st match. For ad-hoc use/testing
-    
+
     # unpack file & folder tuples
     (job_id,source_folder,success_folder,fail_folder,pr,fnp,handler,handler_params,pd) = folder_tup
 #    job_id = -1
 #    handler = ''
-#    
+#
 #    source_folder = ''
 #    handler_params = ''
 #    success_folder = ''
 #    fail_folder = ''
-    
-    # initially file_name may be full path or just file name    
+
+    # initially file_name may be full path or just file name
     file_fullname = os.path.join(source_folder, file_name)
     (tmp,file_name) = os.path.split(file_fullname)
 
     # database connection
     try:
-        connection = pymssql.connect(server='app-2-savvy-work.ciimkozo2x5b.ap-southeast-2.rds.amazonaws.com', user='djangounchained', password='jLddF5JQ%v!0', database='MarketData')
-    except pyodbc.Error:
-        error_text = "Error processing file: %s. Could not establish database connection using connection string %s" % (file_name, db_connection_string)        
+        connection = pymssql.connect(server=db_server, user=db_user, password=db_password, database=db_database)
+    except:
+        error_text = "Error processing file: %s. Could not establish database connection using connection string %s" % (file_name, db_connection_string)
         print(error_text)
         return False
 
     try:
         file_mod_time = datetime.datetime.fromtimestamp(time.time())
     except Exception as e:
-        print(e)        
-        return False                
+        print(e)
+        return False
     # write to loader file list in database
     try:
         with connection.cursor() as curs:
@@ -107,13 +115,13 @@ def process_file(file_name, folder_tup):
             tmp = (job_id, file_name_saved_in_db, source_folder, 'STARTED', 0, file_mod_time)
             print('insert files')
             curs.execute("INSERT INTO MarketData.dbo.SavvyLoaderFiles (job_id,file_name,source_folder,process_status,records_processed,file_modified_dttm) OUTPUT Inserted.ID VALUES (%d,%d,%d,%d,%d,%d)", tmp)
-            fileid = curs.fetchone()[0]     
+            fileid = curs.fetchone()[0]
             connection.commit()
     except Exception as e:
         error_text = "Could not log file to database: %s" % file_name
         print(e)
         return False
-    
+
     # handler parameters
     try:
         hp = ast.literal_eval(handler_params)
@@ -121,7 +129,7 @@ def process_file(file_name, folder_tup):
     except SyntaxError:
         hp = {}
     except TypeError:
-        hp = {}            
+        hp = {}
 
 
     try:
@@ -135,7 +143,7 @@ def process_file(file_name, folder_tup):
             print('asx_handler')
             (success,recs_loaded) = handlers.asx_load(source_file_id=fileid,fname=file_name,conn=connection, **hp)
         elif handler == 'tasHydro_handler':
-            (success,recs_loaded) = handlers.tasHydro_load(source_file_id=fileid,fname=file_fullname,conn=connection, **hp)            
+            (success,recs_loaded) = handlers.tasHydro_load(source_file_id=fileid,fname=file_fullname,conn=connection, **hp)
         elif handler == 'nem12_handler':
             (success,recs_loaded) = handlers.aemo_meter_data_handler(source_file_id=fileid,fname=file_fullname,conn=connection, **hp)
         elif handler == 'precis_forecast_handler':
@@ -148,7 +156,6 @@ def process_file(file_name, folder_tup):
         error_text= "Unknown error in loading handler while processing file %s" % (file_name)
         print(e)
     connection.close()
-        
 
 
 def lambda_handler(event, context):
@@ -165,7 +172,6 @@ if __name__ == '__main__':
     # get_source_file_list(get_source_folder_list())
     # files =get_source_file_list(get_source_folder_list())
     # this_file = files.pop()
-    # print(this_file[0])    
+    # print(this_file[0])
     # print(this_file[1])
     move_file(filename)
-
