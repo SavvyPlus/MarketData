@@ -161,7 +161,7 @@ def process_file(file_name, folder_tup):
 
     # database connection
     try:
-        conn = pyodbc.connect(db_connection_string)
+        conn = pyodbc.connect(db_connection_string, autocommit=True)
     except pyodbc.Error:
         error_text = "Error processing file: %s. Could not establish database connection using connection string %s" % (file_name, db_connection_string)        
         logger.error(error_text, exc_info=1)
@@ -236,9 +236,10 @@ def process_file(file_name, folder_tup):
             logger.error("Invalid or unknown loading handler specified: %s", handler)
     except Exception as ex:
         (success,recs_loaded) = (False,0)
-        error_text= "Unknown error in loading handler while processing file %s" % (file_name)  
+        error_text= "Unknown error in loading handler while processing file %s" % (file_name)
         logger.error(error_text)
-        DataDogAPI.Event.create(title="Unknown error: ", text=error_text+"\n" +str(ex) , alert_type="error",tags=tags,aggregation_key="initialize") 
+        logger.error(str(ex))
+        # DataDogAPI.Event.create(title="Unknown error: ", text=error_text+"\n" +str(ex) , alert_type="error",tags=tags,aggregation_key="initialize") 
 
 
         
