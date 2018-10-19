@@ -242,7 +242,6 @@ def process_file(file_name, folder_tup):
         error_text= "Unknown error in loading handler while processing file %s" % (file_name)
         logger.error(error_text)
         logger.error(str(ex))
- 
         # DataDogAPI.Event.create(title="Unknown error: ", text=error_text+"\n" +str(ex) , alert_type="error",tags=tags,aggregation_key="initialize") 
 
 

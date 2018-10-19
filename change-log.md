@@ -30,7 +30,7 @@ INSERT INTO [dbo].[SavvyLoaderJobs]
            ,10
            ,1
            ,'ClosingRates*.csv'
-           ,'mercari_handle'
+           ,'mercari_handler'
            ,'{''table'':''Environmental_Price_MercariClosingPrices''}'
            ,-1
            ,'Emvironmental Price Mercari Closing Prices')
@@ -104,40 +104,11 @@ MERCARI_FIELD = [
 ]
 ```
 
-992:1023
+```
+...
+def format_column_heading_without_blank_header_key(ch):
+...
 
-``` 
-def mercari_data_handler(source_file_id, fname, conn=None, table='Environmental_Price_MercariClosingPrices', **kwargs):
-    (fpath, filename) = os.path.split(fname)
-    (filename, fileext) = os.path.splitext(filename)
-    key_field = MERCARI_FIELD
 
-    xl = ExcelFile(fname)
-    data_field = xl.parse(**kwargs)
-    data_field = data_field.rename(columns=format_column_heading)
-    # add source file identifier
-    data_field['source_file_id'] = source_file_id
-
-    if table is None:
-        return data_field
-
-    # merge into database
-    sql = sql_merge_statement(table, data_field.keys(), key_field)
-
-    sql_params = map(tuple, data_field.values)
-
-    # convert nans to None so insert/update will work correctly
-    sql_params = map(lambda sp: map(lambda x: None if x.__class__ is float and isnan(x) else x, sp), sql_params)
-    # try:
-    # merge to database if any records found
-    if len(data_field) > 0:
-        curs = conn.cursor()
-        curs.executemany(sql, sql_params)
-        conn.commit()
-        curs.close()
-    # except:
-    #    raise
-    #    return (df, sql)
-    return True, len(data_field)
 ```
 
