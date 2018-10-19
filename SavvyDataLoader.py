@@ -85,7 +85,7 @@ def get_source_folder_list():
         curs.execute("""
             SELECT ID,source_folder,success_folder,fail_folder,[priority]      
             ,filename_pattern,handler,handler_params,success_retention_days
-            FROM [MarketData].[dbo].[SavvyLoaderJobs]
+            FROM [dbo].[SavvyLoaderJobs]
             where active_flag = 1
             ORDER BY [priority] ASC
         """)
@@ -231,6 +231,9 @@ def process_file(file_name, folder_tup):
             (success,recs_loaded) = handlers.aemo_meter_data_handler(source_file_id=fileid,fname=file_fullname,conn=conn, **hp)
         elif handler == 'precis_forecast_handler':
             (success,recs_loaded) = handlers.weather_forecast_load(source_file_id=fileid,fname=file_fullname,conn=conn)
+        elif (handler == 'mercari_handler'):
+            (success, recs_loaded) = handlers.mercari_data_handler(source_file_id=fileid, fname=file_fullname,
+                                                                      conn=conn, **hp)
         else:
             (success,recs_loaded) = (False,0)
             logger.error("Invalid or unknown loading handler specified: %s", handler)
@@ -263,7 +266,7 @@ def process_file(file_name, folder_tup):
     try:
         with conn.cursor() as curs:            
             tmp = ('SUCCESS' if success else 'ERROR', recs_loaded, fileid)
-            curs.execute("UPDATE MarketData.dbo.SavvyLoaderFiles SET process_status = ?, records_processed = ? WHERE ID = ?", tmp)
+            curs.execute("UPDATE dbo.SavvyLoaderFiles SET process_status = ?, records_processed = ? WHERE ID = ?", tmp)
             conn.commit()
     except pyodbc.Error:
         logger.warn("Could not log file processing status to database: %s", file_name)
