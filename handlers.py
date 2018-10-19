@@ -32,7 +32,7 @@ MERCARI_FIELD = [
     'bid',
     'offer',
     'mid',
-    'big_method',
+    'bid_method',
     'offer_method',
     'mid_method'
 ]
@@ -989,56 +989,122 @@ def aemo_meter_data_handler(source_file_id, fname, conn):
     return (True, line_number)
 
 
-def mercari_data_handler(source_file_id, fname, conn=None, table='Environmental_Price_MercariClosingPrices', **kwargs):
-    (fpath, filename) = os.path.split(fname)
+def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environmental_Price_MercariClosingPrices', header_end_text=None, footer_start_text=None,**kwargs):
+    # read entire file into memory
+    f = open(fname, 'rt')
+    s = f.read()
+    f.close()
+ 
+    # identify payload, top & tail
+    start_index = 0 if header_end_text is None else s.find(header_end_text) + len(header_end_text)
+    if header_end_text is not None and start_index < len(header_end_text):  # note: find returns -1 if string not found
+        logger.error("The text specified to indicate the end of the header is not found")
+        DataDogAPI.Event.create(title="Header not found:",
+                                text='The text specified to indicate the end of the header is not found', tags=tags,
+                                alert_type="error")
 
-    key_field = MERCARI_FIELD
-
-    xl = ExcelFile(fname)
-    data_field = xl.parse(**kwargs)
-    data_field = data_field.rename(columns=format_column_heading)
-    # add source file identifier
-    data_field['source_file_id'] = source_file_id
-
-    if table is None:
-        return data_field
-
-    # merge into database
-    sql = sql_mercari_merge_statement(table, data_field.keys(), key_field)
-
-    sql_params = map(tuple, data_field.values)
-
-    # convert nans to None so insert/update will work correctly
-    sql_params = map(lambda sp: map(lambda x: None if x.__class__ is float and isnan(x) else x, sp), sql_params)
+        return (False, 0)
+    else:
+        end_index = len(s) if footer_start_text is None else start_index + s[start_index:].find(footer_start_text)
+        if end_index < start_index:
+            logger.error("The text specified to indicate the beginning of the footer is not found")
+            DataDogAPI.Event.create(title="Footer not found:",
+                                    text='The text specified to indicate the beginning of the footer is not found',
+                                    tags=tags, alert_type="error")
+            return (False, 0)
+  
+    csv_str = s[start_index:end_index]
+    #    if csv_str[0] == ',':
+    #        csv_scsv_str.replace("\n,","\n")[1:]
+    str_buf = StringIO(csv_str)
+  
+    # read as csv
+   
+    df = read_csv(str_buf)
     
+    # parse csv headings and verify they match destination table
+    df = df.rename(columns=format_column_heading_without_blank_header_key)
+
+    #remove last column key error
+    if 'unknown_10' in df.keys():
+        del df.keys()['unknown_10']
+     
+    # add source file identifier
+    df['source_file_id'] = source_file_id
+
+
+    # determine key fields and data fields
+    key_fields = MERCARI_FIELD
+    if key_fields is None:
+        key_fields = []
+    else:
+        if not set(key_fields).issubset(df.keys()):
+            error_text = 'key_fields must be a subset of csv fields. key_fields: %s, csv fields: %s' % str(
+                key_fields), str(df.keys())
+            logger.error(error_text)
+            DataDogAPI.Event.create(title="CSV felds error:", text=error_text, tags=tags, alert_type="error")
+            return (False, 0)
+
+    #
+    #    else:
+    #        logger.warning('')
+
+    # check for duplicates/conflicts
+
+    # fields to compare
+
+    # return dataframe if destination table is not specified
+    if dest_table is None:
+        return df
+    # merge into database
+	
+    sql = sql_mercari_merge_statement(dest_table, df.keys(), key_fields)
+
+
+   
+    sql_params = map(tuple, df.values)
+        
+    # convert nans to None so insert/update will work correctly    
+    sql_params = map(lambda sp: map(lambda x: None if x.__class__ is float and isnan(x) else x, sp), sql_params)
+
+    intergrate_params = []
+    for item in sql_params:
+        if item[0] != item[1] and item[0] != item[2] and item[0] != item[3]:
+            del item[len(item) - 2]
+            if item[0] is None:
+                item[0] = 'ESC'
+            if item[1] is None:
+                item[1] = 'Spot'
+            intergrate_params.append(item)    
+
+    # try:
     # merge to database if any records found
-    if len(data_field) > 0:
+    if len(df) > 0:
         curs = conn.cursor()
-        curs.executemany(sql, sql_params)
+        curs.executemany(sql, intergrate_params)
         conn.commit()
         curs.close()
-    return True, len(data_field)
+    # except:
+    #    raise
+    #    return (df, sql)
+
+    return (True, len(df))
 
 
 def sql_mercari_merge_statement(dest_table, all_fields, key_fields):
+  
     data_fields = list(set(all_fields).difference(key_fields))
-    print("=============data fields==================")
-    print(data_fields)
-    print("===============================")
     all_fields = map(lambda x: "[" + x + "]", all_fields)
-    print("=============all fields==================")
-    print(data_fields)
-    print("===============================")
+
+    if '[unnamed_10]' in all_fields:
+        all_fields.remove('[unnamed_10]')
+
     key_fields = map(lambda x: "[" + x + "]", key_fields)
-    print("=============key fields==================")
-    print(data_fields)
-    print("===============================")
     data_fields = map(lambda x: "[" + x + "]", data_fields)
-
-    print("===============data fields 2 after map================")
-    print(data_fields)
-    print("===============================")
-
+ 
+    if '[unnamed_10]' in data_fields:
+        data_fields.remove('[unnamed_10]')
+    
     if len(key_fields) > 0:
         s = "MERGE " + dest_table + "\nUSING (\n\tVALUES(" + ','.join(map(lambda x: '?', all_fields)) + ")\n)"
         s = s + " AS src (" + ','.join(all_fields) + ")\n ON "
@@ -1051,4 +1117,38 @@ def sql_mercari_merge_statement(dest_table, all_fields, key_fields):
     else:
         s = "INSERT INTO " + dest_table + "(" + ','.join(all_fields) + ") VALUES (" + ','.join(
             map(lambda x: '?', all_fields)) + ")"
+
     return s
+
+   
+
+
+def format_column_heading_without_blank_header_key(ch):
+
+    # handle tupleized columns
+    if ch.__class__ is tuple:
+        tup = ch
+        ch = ''
+        for elem in tup:
+            ch = ch + ('' if elem.startswith('Unnamed') else elem + ' ')
+
+    # remove leading/trailing whitespace    
+    ch = ch.strip()
+
+    # remove [number] from rhs
+    s = match(r"\][0-9]+\[", ch[::-1])  # apply reversed pattern to reversed string because it occurs on rhs
+    ch = ch if s is None else ch[:-s.end()]
+
+    # ensure all characters are alphanumeric or underscore
+    ch = sub(r"[^$A-Za-z0-9_]+", '_', ch)
+
+    # remove leading & trailing underscores
+    ch = ch.strip("_")
+
+    # ensure first character is valid else prepend underscore
+    ch = ch if match(r"[$0-9]", ch) is None else "_" + ch
+
+    # lower case
+    ch = ch.lower()
+
+    return ch

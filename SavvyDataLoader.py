@@ -85,7 +85,7 @@ def get_source_folder_list():
         curs.execute("""
             SELECT ID,source_folder,success_folder,fail_folder,[priority]      
             ,filename_pattern,handler,handler_params,success_retention_days
-            FROM [MarketData].[dbo].[SavvyLoaderJobs]
+            FROM [dbo].[SavvyLoaderJobs]
             where active_flag = 1
             ORDER BY [priority] ASC
         """)
@@ -231,7 +231,7 @@ def process_file(file_name, folder_tup):
             (success,recs_loaded) = handlers.aemo_meter_data_handler(source_file_id=fileid,fname=file_fullname,conn=conn, **hp)
         elif handler == 'precis_forecast_handler':
             (success,recs_loaded) = handlers.weather_forecast_load(source_file_id=fileid,fname=file_fullname,conn=conn)
-        elif (handler == 'mecari_handler'):
+        elif (handler == 'mercari_handler'):
             (success, recs_loaded) = handlers.mercari_data_handler(source_file_id=fileid, fname=file_fullname,
                                                                       conn=conn, **hp)
         else:
@@ -242,6 +242,7 @@ def process_file(file_name, folder_tup):
         error_text= "Unknown error in loading handler while processing file %s" % (file_name)
         logger.error(error_text)
         logger.error(str(ex))
+ 
         # DataDogAPI.Event.create(title="Unknown error: ", text=error_text+"\n" +str(ex) , alert_type="error",tags=tags,aggregation_key="initialize") 
 
 

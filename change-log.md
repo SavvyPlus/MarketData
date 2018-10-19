@@ -31,7 +31,7 @@ INSERT INTO [dbo].[SavvyLoaderJobs]
            ,1
            ,'ClosingRates*.csv'
            ,'mercari_handle'
-           ,'{''table'':''Environmental_Price_MercariClosingPrices'']}'
+           ,'{''table'':''Environmental_Price_MercariClosingPrices''}'
            ,-1
            ,'Emvironmental Price Mercari Closing Prices')
 GO
@@ -60,7 +60,7 @@ CREATE TABLE [dbo].[Environmental_Price_MercariClosingPrices](
 	[bid] [float] NULL,
 	[offer] [float] NULL,
 	[mid] [float] NULL,
-	[big_method] [int] NULL,
+	[bid_method] [int] NULL,
 	[offer_method] [int] NULL,
 	[mid_method] [nchar](10) NULL,
 	[source_file_id] [int] NULL,
@@ -98,7 +98,7 @@ MERCARI_FIELD = [
     'bid',
     'offer',
     'mid',
-    'big_method',
+    'bid_method',
     'offer_method',
     'mid_method'
 ]
