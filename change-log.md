@@ -24,9 +24,9 @@ INSERT INTO [dbo].[SavvyLoaderJobs]
            ,[success_retention_days]
            ,[job_description])
      VALUES
-           ('D:\MarketData\Queue\Mercari'
-           ,'D:\MarketData\Archive\Mercari'
-           ,'D:\MarketData\Errors\Mercari'
+           ('E:\MarketData\Queue\Mercari'
+           ,'E:\MarketData\Archive\Mercari'
+           ,'E:\MarketData\Errors\Mercari'
            ,10
            ,1
            ,'ClosingRates*.csv'
