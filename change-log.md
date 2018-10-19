@@ -104,11 +104,16 @@ MERCARI_FIELD = [
 ]
 ```
 
+UPDATE 2 new function handling Mercari
+
 ```
 ...
-def format_column_heading_without_blank_header_key(ch):
+def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environmental_Price_MercariClosingPrices',
+                         header_end_text=None, footer_start_text=None, **kwargs):
 ...
 
+def sql_mercari_merge_statement(dest_table, all_fields, key_fields):
+...
 
 ```
 

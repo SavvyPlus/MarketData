@@ -266,7 +266,7 @@ def process_file(file_name, folder_tup):
     try:
         with conn.cursor() as curs:            
             tmp = ('SUCCESS' if success else 'ERROR', recs_loaded, fileid)
-            curs.execute("UPDATE MarketData.dbo.SavvyLoaderFiles SET process_status = ?, records_processed = ? WHERE ID = ?", tmp)
+            curs.execute("UPDATE dbo.SavvyLoaderFiles SET process_status = ?, records_processed = ? WHERE ID = ?", tmp)
             conn.commit()
     except pyodbc.Error:
         logger.warn("Could not log file processing status to database: %s", file_name)
