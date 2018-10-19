@@ -231,6 +231,9 @@ def process_file(file_name, folder_tup):
             (success,recs_loaded) = handlers.aemo_meter_data_handler(source_file_id=fileid,fname=file_fullname,conn=conn, **hp)
         elif handler == 'precis_forecast_handler':
             (success,recs_loaded) = handlers.weather_forecast_load(source_file_id=fileid,fname=file_fullname,conn=conn)
+        elif (handler == 'mecari_handler'):
+            (success, recs_loaded) = handlers.mercari_data_handler(source_file_id=fileid, fname=file_fullname,
+                                                                      conn=conn, **hp)
         else:
             (success,recs_loaded) = (False,0)
             logger.error("Invalid or unknown loading handler specified: %s", handler)
