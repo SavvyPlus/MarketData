@@ -1062,7 +1062,7 @@ def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environme
     integrate_params = []
     for item in sql_params:
         if item[0] != item[1] and item[0] != item[2] and item[0] != item[3]:
-            if len(item) > 11:
+            if len(item) > 12:
               del item[len(item) - 2]
             if item[0] is None:
                 item[0] = 'ESC'
