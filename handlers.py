@@ -8,7 +8,7 @@ import pyodbc
 import logging
 from StringIO import StringIO
 from pandas import read_csv, ExcelFile, DataFrame
-from re import match, sub
+from re import match, sub, search
 from math import isnan
 from petl import addfield
 from datetime import datetime
@@ -989,7 +989,7 @@ def aemo_meter_data_handler(source_file_id, fname, conn):
     return (True, line_number)
 
 
-def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environmental_Price_MercariClosingPrices',
+def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environmental_Prices_MercariClosingPrices',
                          header_end_text=None, footer_start_text=None, **kwargs):
     # read entire file into memory
     f = open(fname, 'rt')
@@ -1031,7 +1031,12 @@ def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environme
     # add source file identifier
     df['source_file_id'] = source_file_id
 
-    # determine key fields and data fields
+    #get date from file name
+    date_match = search(r'\d{4}-\d{2}-\d{2}', fname)
+    if date_match.group():
+        df['added_dttm'] = date_match.group();
+
+    # determine key fields and data fieldse
     key_fields = MERCARI_FIELD
     if key_fields is None:
         key_fields = []
