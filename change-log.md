@@ -126,7 +126,7 @@ Change name table Environmental_Price_MercariClosingPrices to Environmental_Pric
 
 > Using Procedures
 ``` 
-EXEC sp_rename 'Environmental_Prices_MercariClosingPrices', 'Environmental_Price_MercariClosingPrices'
+EXEC sp_rename 'Environmental_Price_MercariClosingPrices', 'Environmental_Prices_MercariClosingPrices'
 ```
 
 update code match a day in filename
