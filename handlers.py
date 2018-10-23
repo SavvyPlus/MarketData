@@ -1034,7 +1034,7 @@ def mercari_data_handler(source_file_id, fname, conn=None, dest_table='Environme
     #get date from file name
     date_match = search(r'\d{4}-\d{2}-\d{2}', fname)
     if date_match.group():
-        df['added_dttm'] = date_match.group();
+        df['date'] = date_match.group();
 
     # determine key fields and data fieldse
     key_fields = MERCARI_FIELD

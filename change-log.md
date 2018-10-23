@@ -138,3 +138,16 @@ update code match a day in filename
         df['added_dttm'] = date_match.group();
 ...        
 ```
+
+---
+## 23/10/2018
+add date to Environmental_Prices_MercariClosingPrices
+``` 
+ALTER TABLE Environmental_Prices_MercariClosingPrices ADD date datetime;
+```
+
+Change day in filename add to date column
+``` 
+    if date_match.group():
+        df['date'] = date_match.group();
+```
