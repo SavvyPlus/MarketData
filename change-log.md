@@ -1,9 +1,10 @@
-## Change Log - Charlie
-Created At: 18/10/2018
+# Change Log
+ - Created At: 18/10/2018
+ - Last Updated At: 22/10/2018
 
-## Update Database
+# Update Database
 
-
+## 18/10/2018
 **Create new record in SavvyLoaderJob**
 
 > *Warning: Must check source_folder, success_folder and fail_folder before run code*
@@ -117,3 +118,36 @@ def sql_mercari_merge_statement(dest_table, all_fields, key_fields):
 
 ```
 
+---
+
+## 22/10/2018
+
+Change name table Environmental_Price_MercariClosingPrices to Environmental_Prices_MercariClosingPrices
+
+> Using Procedures
+``` 
+EXEC sp_rename 'Environmental_Price_MercariClosingPrices', 'Environmental_Prices_MercariClosingPrices'
+```
+
+update code match a day in filename
+
+``` 
+...
+    date_match = search(r'\d{4}-\d{2}-\d{2}', fname)
+    if date_match.group():
+        df['added_dttm'] = date_match.group();
+...        
+```
+
+---
+## 23/10/2018
+add date to Environmental_Prices_MercariClosingPrices
+``` 
+ALTER TABLE Environmental_Prices_MercariClosingPrices ADD date datetime;
+```
+
+Change day in filename add to date column
+``` 
+    if date_match.group():
+        df['date'] = date_match.group();
+```

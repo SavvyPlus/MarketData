@@ -179,7 +179,7 @@ def process_file(file_name, folder_tup):
 
     except EnvironmentError:
         error_text= "File does not exist or is in use by another process: %s" % (file_fullname)        
-        logger.error(error_text, file_fullname, exc_info=1)
+        logger.error(error_text, exc_info=1)
         DataDogAPI.Event.create(title="EnvironmentError file:", text=error_text, alert_type="error") 
         return False
 
