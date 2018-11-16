@@ -2,7 +2,8 @@ datadog==0.17.0
 altgraph==0.16.1
 asn1crypto==0.24.0
 backports.functools-lru-cache==1.5
-cdecimal==2.3
+# cdecimal==2.3
+m3-cdecimal
 cffi==1.11.5
 configparser==3.5.0
 cryptography==2.3.1
