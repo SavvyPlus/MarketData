@@ -29,3 +29,5 @@ BOM_IntraDay_Weather_MSSQL_Columns = """
 """
 BOM_IntraDay_Weather_Columns = [col.strip()[1:-1] for col in
                                 BOM_IntraDay_Weather_MSSQL_Columns.strip().split(',')]
+BOM_IntraDay_Weather_Keys = ['StationNo', 'DateTime_Local']
+BOM_IntraDay_Weather_Table = 'BOM_IntraDay_Weather'
