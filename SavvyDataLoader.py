@@ -226,7 +226,7 @@ def process_file(file_name, folder_tup):
         elif handler == 'unzip':
             (success,recs_loaded) = handlers.unzip_handler(source_file_id=fileid,fname=file_fullname,conn=conn, **hp)
         elif handler == 'unzip_pattern':
-            (success,recs_loaded) = commons.unzip_pattern_handler(fname=file_fullname, **hp)
+            (success,recs_loaded) = commons.unzip_pattern_handler(file_fullname, **hp)
         elif handler == 'asx_handler':
             (success,recs_loaded) = handlers.asx_load(source_file_id=fileid,fname=file_fullname,conn=conn, **hp)
         elif handler == 'tasHydro_handler':
