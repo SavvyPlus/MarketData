@@ -195,7 +195,7 @@ def process_file(file_name, folder_tup):
             else:
                 file_name_saved_in_db = file_name
             tmp = (job_id, file_name_saved_in_db, source_folder, 'STARTED', 0, file_mod_time)
-            curs.execute("INSERT INTO MarketData.dbo.SavvyLoaderFiles (job_id,file_name,source_folder,process_status,records_processed,file_modified_dttm) OUTPUT Inserted.ID VALUES (?,?,?,?,?,?)", tmp)
+            curs.execute("INSERT INTO dbo.SavvyLoaderFiles (job_id,file_name,source_folder,process_status,records_processed,file_modified_dttm) OUTPUT Inserted.ID VALUES (?,?,?,?,?,?)", tmp)
             fileid = curs.fetchone()[0]
             conn.commit()
     except pyodbc.Error:
@@ -238,6 +238,8 @@ def process_file(file_name, folder_tup):
         elif (handler == 'mercari_handler'):
             (success, recs_loaded) = handlers.mercari_data_handler(source_file_id=fileid, fname=file_fullname,
                                                                       conn=conn, **hp)
+        elif (handler == 'hm01x_handler'):
+            (success, recs_loaded) = bom.hm01x_handler(fileid, file_fullname, conn=conn, **hp)
         else:
             (success,recs_loaded) = (False,0)
             logger.error("Invalid or unknown loading handler specified: %s", handler)

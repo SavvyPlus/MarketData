@@ -38,13 +38,14 @@ def hm01x_loader(source_file_id, file_path, **kwargs):
     return df
 
 
-def hm01x_handler(source_file_id, file_path, conn=None,
-                  dest_table=settings.BOM_IntraDay_Weather_Table, **kwargs):
+def hm01x_handler(source_file_id, file_path, conn=None, **kwargs):
     try:
         df = hm01x_loader(source_file_id, file_path, **kwargs)
     except Exception as e:
         logger.error('hm01x_loader error: {}'.format(e))
         return (False, 0)
+
+    dest_table = kwargs.get('dest_table', settings.BOM_IntraDay_Weather_Table)
 
     if dest_table is None:
         return (df, len(df.index))
