@@ -1,5 +1,6 @@
 
 import logging
+from math import isnan
 from StringIO import StringIO
 import pandas as pd
 
