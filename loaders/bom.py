@@ -16,7 +16,8 @@ def hm01x_loader(source_file_id, file_path, **kwargs):
 
     df = pd.read_csv(file_path, header=header)
 
-    df = df.drop(columns=['#'])
+    # df = df.drop(columns=['#'])
+    del df['#']
     df.insert(2, 'DateTime_Local', 0, allow_duplicates=True)
     df.insert(8, 'DateTime_Std', 0, allow_duplicates=True)
 
@@ -28,12 +29,12 @@ def hm01x_loader(source_file_id, file_path, **kwargs):
     df['DateTime_Local'] = df['Year_Local'].map(str) + '-' + df['Month_Local'].map(str) + '-' + \
                            df['Day_Local'].map(str) + ' ' + df['Hour_Local'].map(str) + ':' + \
                            df['Minute_Local'].map(str) + ':00.000'
-    df['DateTime_Local'] = pd.to_datetime(df['DateTime_Local'], format='%Y-%m-%d %H:%M:%S.%f')
+    # df['DateTime_Local'] = pd.to_datetime(df['DateTime_Local'], format='%Y-%m-%d %H:%M:%S.%f')
 
     df['DateTime_Std'] = df['Year_Std'].map(str) + '-' + df['Month_Std'].map(str) + '-' + \
                          df['Day_Std'].map(str) + ' ' + df['Hour_Std'].map(str) + ':' + \
                          df['Minute_Std'].map(str) + ':00.000'
-    df['DateTime_Std'] = pd.to_datetime(df['DateTime_Std'], format='%Y-%m-%d %H:%M:%S.%f')
+    # df['DateTime_Std'] = pd.to_datetime(df['DateTime_Std'], format='%Y-%m-%d %H:%M:%S.%f')
     return df
 
 

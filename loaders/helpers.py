@@ -3,7 +3,7 @@ import zipfile
 import datetime
 
 
-def get_time_now(text=True, format='%Y-%m-%d %H:%M:%S.%f'):
+def get_time_now(text=True, format='%Y-%m-%d %H:%M:%S'):
     if text is True:
         return datetime.datetime.now().strftime(format)
     else:
